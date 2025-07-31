@@ -19,7 +19,7 @@
       padding: 20px;
     }
     .container {
-      background: white;
+      background: rgb(255, 255, 255);
       border-radius: 12px;
       max-width: 600px;
       width: 100%;
@@ -63,6 +63,8 @@
       font-weight: 600;
       width: 100%;
     }
+
+
     button:hover:not(:disabled) { background: #4b33cc; }
     button:disabled {
       background: #b9b1eb;
@@ -105,6 +107,7 @@
 </head>
 <body>
   <div class="container" role="main" aria-label="Beni Tanıyor Musun? Test Uygulaması">
+    <button onclick="bilgial()" id="bilgiler">nasıl yapılır</button>
     <h1>Beni ne kadar iyi tanıyorsun</h1>
 
     <!-- Soru oluşturma -->
@@ -156,6 +159,12 @@
   </div>
 
 <script>
+
+function bilgial(){
+    alert("soruları hazırla sonra testa başla butonuna tıkla ardından linki kopyala arkadaşına gönder ve seni ne kadar tanıdığını öğren")
+}
+
+
 (() => {
   const params = new URLSearchParams(window.location.search);
   const isTestMode = params.get('screen') === 'test';

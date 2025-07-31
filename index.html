@@ -157,6 +157,9 @@
 
 <script>
 (() => {
+  const getParam = name => new URLSearchParams(window.location.search).get(name);
+  const isTestMode = getParam('screen') === 'test';
+
   const formSection = document.getElementById('form-section');
   const testSection = document.getElementById('test-section');
   const resultSection = document.getElementById('result-section');
@@ -186,25 +189,23 @@
   let currentIndex = 0;
   let userAnswers = [];
 
-  // Sayfa ilk açıldığında URL'ye göre ekranı seç
   window.addEventListener('DOMContentLoaded', () => {
-    // Eğer URL "/start" ile bitiyorsa test ekranını aç
-    if (window.location.pathname.endsWith('/start')) {
-      const saved = localStorage.getItem('questions');
-      if (saved) {
-        questions = JSON.parse(saved);
-        if (questions.length > 0) {
-          showTest();
-        } else {
-          alert('Test başlatılamıyor. Kayıtlı soru bulunamadı.');
-          showForm();
-        }
-      } else {
-        alert('Test başlatılamıyor. Kayıtlı soru bulunamadı.');
-        showForm();
+    if (!isTestMode) {
+      localStorage.removeItem('questions');
+    }
+
+    const saved = localStorage.getItem('questions');
+    if (saved) {
+      questions = JSON.parse(saved);
+    }
+
+    if (isTestMode) {
+      if (!questions.length) {
+        alert("Test başlatılamıyor. Soru bulunamadı.");
+        return;
       }
+      showTest();
     } else {
-      // Değilse form ekranını göster
       showForm();
     }
   });
@@ -224,6 +225,9 @@
     userAnswers = new Array(questions.length).fill(null);
     renderQuestion();
     updateButtons();
+
+    // URL'yi göreli olarak "start" yap (mutlak değil)
+    window.history.replaceState(null, '', 'start');
   }
 
   function showResult(score) {
@@ -297,8 +301,6 @@
 
   startBtn.onclick = () => {
     localStorage.setItem('questions', JSON.stringify(questions));
-    // URL'yi /start yap ve test ekranını göster
-    history.pushState(null, '', '/start');
     showTest();
   };
 
@@ -328,9 +330,7 @@
 
   restartBtn.onclick = () => {
     localStorage.removeItem('questions');
-    // URL'yi kök path yap
-    history.pushState(null, '', '/');
-    showForm();
+    window.location.href = window.location.pathname;
   };
 })();
 </script>

@@ -157,9 +157,6 @@
 
 <script>
 (() => {
-  const getParam = name => new URLSearchParams(window.location.search).get(name);
-  const isTestMode = getParam('screen') === 'test';
-
   const formSection = document.getElementById('form-section');
   const testSection = document.getElementById('test-section');
   const resultSection = document.getElementById('result-section');
@@ -189,24 +186,25 @@
   let currentIndex = 0;
   let userAnswers = [];
 
-  // Sayfa ilk açıldığında soruları temizle
+  // Sayfa ilk açıldığında URL'ye göre ekranı seç
   window.addEventListener('DOMContentLoaded', () => {
-    if (!isTestMode) {
-      localStorage.removeItem('questions');
-    }
-
-    const saved = localStorage.getItem('questions');
-    if (saved) {
-      questions = JSON.parse(saved);
-    }
-
-    if (isTestMode) {
-      if (!questions.length) {
-        alert("Test başlatılamıyor. Soru bulunamadı.");
-        return;
+    // Eğer URL "/start" ile bitiyorsa test ekranını aç
+    if (window.location.pathname.endsWith('/start')) {
+      const saved = localStorage.getItem('questions');
+      if (saved) {
+        questions = JSON.parse(saved);
+        if (questions.length > 0) {
+          showTest();
+        } else {
+          alert('Test başlatılamıyor. Kayıtlı soru bulunamadı.');
+          showForm();
+        }
+      } else {
+        alert('Test başlatılamıyor. Kayıtlı soru bulunamadı.');
+        showForm();
       }
-      showTest();
     } else {
+      // Değilse form ekranını göster
       showForm();
     }
   });
@@ -299,6 +297,8 @@
 
   startBtn.onclick = () => {
     localStorage.setItem('questions', JSON.stringify(questions));
+    // URL'yi /start yap ve test ekranını göster
+    history.pushState(null, '', '/start');
     showTest();
   };
 
@@ -328,33 +328,11 @@
 
   restartBtn.onclick = () => {
     localStorage.removeItem('questions');
-    window.location.href = window.location.pathname;
+    // URL'yi kök path yap
+    history.pushState(null, '', '/');
+    showForm();
   };
 })();
-
-
-  
 </script>
-  
-  <script>
-     // Sayfa yüklendiğinde çalışır
-  document.addEventListener('DOMContentLoaded', () => {
-    const screen = new URLSearchParams(window.location.search).get('screen');
-
-    if (screen === 'test') {
-      const savedQuestions = JSON.parse(localStorage.getItem('questions') || '[]');
-      if (savedQuestions.length > 0) {
-        questions = savedQuestions;
-        showTest(); // Testi başlat
-      } else {
-        alert('Test başlatılamadı: Kayıtlı soru bulunamadı. Lütfen önce soruları ekleyin.');
-        formSection.classList.add('active'); // Formu göster
-      }
-    } else {
-      formSection.classList.add('active'); // Normal form sayfası
-    }
-  });
-  </script>
-  
 </body>
 </html>

@@ -331,6 +331,25 @@
     window.location.href = window.location.pathname;
   };
 })();
+
+ // Sayfa yüklendiğinde çalışır
+  document.addEventListener('DOMContentLoaded', () => {
+    const screen = new URLSearchParams(window.location.search).get('screen');
+
+    if (screen === 'test') {
+      const savedQuestions = JSON.parse(localStorage.getItem('questions') || '[]');
+      if (savedQuestions.length > 0) {
+        questions = savedQuestions;
+        showTest(); // Testi başlat
+      } else {
+        alert('Test başlatılamadı: Kayıtlı soru bulunamadı. Lütfen önce soruları ekleyin.');
+        formSection.classList.add('active'); // Formu göster
+      }
+    } else {
+      formSection.classList.add('active'); // Normal form sayfası
+    }
+  });
+  
 </script>
 </body>
 </html>

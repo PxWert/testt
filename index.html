@@ -104,11 +104,11 @@
   </style>
 </head>
 <body>
-  <div class="container">
+  <div class="container" role="main" aria-label="Beni Tanıyor Musun? Test Uygulaması">
     <h1>Beni ne kadar iyi tanıyorsun</h1>
 
     <!-- Soru oluşturma -->
-    <section id="form-section" class="section">
+    <section id="form-section" class="section" aria-live="polite">
       <label for="question-text">Soru Metni:</label>
       <input type="text" id="question-text" />
 
@@ -135,7 +135,7 @@
     </section>
 
     <!-- Test çözme -->
-    <section id="test-section" class="section">
+    <section id="test-section" class="section" aria-live="polite">
       <div class="question-block">
         <h3 id="question-title"></h3>
         <div id="options-container" class="options"></div>
@@ -148,7 +148,7 @@
     </section>
 
     <!-- Sonuç -->
-    <section id="result-section" class="section">
+    <section id="result-section" class="section" aria-live="polite">
       <div class="score" id="final-score"></div>
       <div class="message" id="final-message"></div>
       <button id="restart-btn">Yeniden Başla</button>
@@ -157,8 +157,8 @@
 
 <script>
 (() => {
-  const getParam = name => new URLSearchParams(window.location.search).get(name);
-  const isTestMode = getParam('screen') === 'test';
+  const params = new URLSearchParams(window.location.search);
+  const isTestMode = params.get('screen') === 'test';
 
   const formSection = document.getElementById('form-section');
   const testSection = document.getElementById('test-section');
@@ -202,6 +202,7 @@
     if (isTestMode) {
       if (!questions.length) {
         alert("Test başlatılamıyor. Soru bulunamadı.");
+        showForm();
         return;
       }
       showTest();
@@ -214,6 +215,8 @@
     formSection.classList.add('active');
     testSection.classList.remove('active');
     resultSection.classList.remove('active');
+    startBtn.disabled = questions.length === 0;
+    updateQuestionList();
   }
 
   function showTest() {
@@ -225,9 +228,6 @@
     userAnswers = new Array(questions.length).fill(null);
     renderQuestion();
     updateButtons();
-
-    // URL'yi göreli olarak "start" yap (mutlak değil)
-    window.history.replaceState(null, 'https://pxwert.github.io/testt/', 'start');
   }
 
   function showResult(score) {
@@ -236,9 +236,9 @@
 
     finalScore.textContent = `Puanınız: ${score} / ${questions.length}`;
     finalMessage.textContent = score === questions.length
-      ? 'vay be beni gerçekten de çok iyi tanıyorsun'
+      ? 'Vay be, beni gerçekten çok iyi tanıyorsun!'
       : score >= questions.length * 0.7
-        ? 'Fena değil! Ama benimle biraz dahha zaman geçirmen gerek gibi.'
+        ? 'Fena değil! Ama biraz daha dikkat etmelisin.'
         : 'Hmmm... Çok tanımıyorsun galiba :)';
   }
 
@@ -248,7 +248,7 @@
     const options = shuffle([q.correct, ...q.wrongs]);
     optionsContainer.innerHTML = '';
     options.forEach(opt => {
-      const id = `opt-${opt}`;
+      const id = `opt-${currentIndex}-${opt.replace(/\s+/g, '')}`;
       const label = document.createElement('label');
       label.className = 'option';
       label.innerHTML = `<input type="radio" name="option" value="${opt}" id="${id}"> ${opt}`;
@@ -301,7 +301,8 @@
 
   startBtn.onclick = () => {
     localStorage.setItem('questions', JSON.stringify(questions));
-    showTest();
+    // URL'yi ?screen=test parametresi ile değiştir ve sayfayı yenile
+    window.location.href = window.location.pathname + '?screen=test';
   };
 
   prevBtn.onclick = () => {
@@ -330,9 +331,11 @@
 
   restartBtn.onclick = () => {
     localStorage.removeItem('questions');
+    // Yeniden form ekranına dönmek için URL'yi parametresiz yap
     window.location.href = window.location.pathname;
   };
 })();
 </script>
+
 </body>
 </html>
